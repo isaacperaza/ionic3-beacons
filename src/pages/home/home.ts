@@ -110,12 +110,12 @@ export class HomePage {
     return beacon.address ? beacon.address : '';
   }
 
-  openDetails() {
+  openDetails(beaconData) {
     if (this.platform.is('cordova')) {
       this.browserTab.isAvailable()
         .then(isAvailable => {
           if (isAvailable) {
-            this.browserTab.openUrl(this.beaconData.data.url);
+            this.browserTab.openUrl(beaconData.url);
           }
         });
     };

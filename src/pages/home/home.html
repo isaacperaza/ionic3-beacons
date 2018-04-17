@@ -26,6 +26,14 @@
         <p>
           {{beaconData.data.body}}
         </p>
+
+        <ion-grid>
+          <ion-row>
+            <ion-col text-center>
+              <button ion-button outline (click)="openDetails(beaconData.data)">Ver mas información</button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </ion-card-content>
     </ion-card>
 
