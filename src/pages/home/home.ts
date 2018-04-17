@@ -1,38 +1,54 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { Platform } from 'ionic-angular';
-// declare const cordova: any;
-declare const evothings: any;
+import { DomSanitizer } from '@angular/platform-browser';
+import { BrowserTab } from '@ionic-native/browser-tab';
 
-interface Becon {
-  id: string;
-  url: string;
-}
+declare const evothings: any;
 
 @Component({
   selector: 'page-home',
-  templateUrl: 'home.html'
+  templateUrl: 'home.html',
+  providers: [
+    BrowserTab
+  ]
 })
 export class HomePage {
 
-  beaconData: any = false;
+  beaconData: any = null;
   beacons = {};
   random: number = 0;
+  homeUrl: string = 'https://sites.google.com/view/smart-urbem-v1-0-uid/pagina-principal';
 
   // Añadir una entrada por cada beacon con su url
   // para que funcione sin problema usa HTTPS
-  private beaconDirectory: Array<Becon> = [
-    //{"id":"DB:BB:62:4C:3F:B0", "url":"http://www.mazportal.com/beacon/uno/"},
-    { "id": "DB:BB:62:4C:3F:B0", "url": "https://tinyurl.com/y92cm23h" },
-    //{"id":"40,0,129,150,203,140", "url":"beacon1.html"},
-    //{"id":"C2:89:B8:9E:48:CC", "url":"http://www.mazportal.com/beacon/dos/"},
-    { "id": "C2:89:B8:9E:48:CC", "url": "https://tinyurl.com/y8h3wg7g" },
-    //{"id":"236,175,56,243,83,138", "url":"beacon2.html"},
-    { "id": "id_beacon_04", "url": "https://tinyurl.com/ya6pc374" },
-    { "id": "id_beacon_05", "url": "https://evothings.com/" }
+  private beaconDirectory: Array<any> = [
+    {
+      id: 'DB:BB:62:4C:3F:B0',
+      url: 'https://tinyurl.com/y92cm23h',
+      img: 'assets/imgs/www/site1/main.jpg',
+      title: 'El Faro Mazatlán',
+      body: 'El majestuoso faro de Mazatlán se encuentra ubicado en la cima del cerro del Crestón, en el extremo sur de la península de la ciudad de Mazatlán, Sinaloa, México. El faro tiene la peculiaridad de estar asentado en lo que era antiguamente una isla y tiene una longitud de 641 metros por 321 metros de ancho y una altitud de 157 metros y el hecho de estar sobre una imponente formación natural lo hace ser aun más espectacular.'
+    },
+    {
+      id: 'C2:89:B8:9E:48:CC',
+      url: 'https://tinyurl.com/y8h3wg7g',
+      img: 'assets/imgs/www/site2/main.jpg',
+      title: 'Monumento Al Pescador (Monos Bichis)',
+      body: 'El Monumento al Pescador de la Ciudad de Mazatlán se encuentra en la Avenida del Mar. Este es uno de los monumentos más representativos de la ciudad y también se le conoce como “Los Monos Bichis”, figuras humanas desnudas en perfecta armonía con elementos marinos como un pez vela y un delfín, además de la silueta de una mujer recostada, todo esto debajo de un faro. '
+    }
   ];
 
-  constructor(private change: ChangeDetectorRef, private platform: Platform) {
 
+  constructor(
+    public sanitizer: DomSanitizer,
+    private change: ChangeDetectorRef,
+    private platform: Platform,
+    private browserTab: BrowserTab
+  ) {
+  }
+
+  ionViewDidLoad() {
+    this.startScanForBeacones();
   }
 
   startScanForBeacones() {
@@ -41,13 +57,7 @@ export class HomePage {
         // console.log(beacon);
         beacon.timeStamp = Date.now();
         this.beacons[beacon.address] = beacon;
-
         this.nearestBeocon();
-
-        setTimeout(() => {
-          console.log('setTimeout');
-          this.change.detectChanges();
-        }, 500);
       });
     }).catch(err => console.log(err));
   }
@@ -64,8 +74,12 @@ export class HomePage {
     });
 
     this.random = Math.random();
-    this.beaconData = beaconList.splice(0, 1)[0];
-    this.beaconData.www = this.getBeaconUrl(this.beaconData.address);
+    if (this.beaconData === null || this.beaconData.id != this.beaconData.address) {
+      this.beaconData = beaconList.splice(0, 1)[0];
+      console.log(this.beaconData);
+      this.beaconData.data = this.getBeaconUrl(this.beaconData.address);
+      this.change.detectChanges();
+    }
   }
 
   /**
@@ -78,22 +92,32 @@ export class HomePage {
   }
 
 
-
   //Esta función se llama desde app.js
   getBeaconUrl(beaconId) {
-    let url = '';
+    let data = '';
     for (let i = 0; i < this.beaconDirectory.length; i++) {
       if (this.beaconDirectory[i].id === beaconId) {
-        url = this.beaconDirectory[i].url;
+        data = this.beaconDirectory[i];
         break;
       }
       //console.log(typeof url+' url3 '+ url.length); 
     }
 
-    return url;
+    return data;
   }
 
   getBeaconStringMacAddress(beacon): string {
-		return beacon.address ? beacon.address : ''; 
-	}
+    return beacon.address ? beacon.address : '';
+  }
+
+  openDetails() {
+    if (this.platform.is('cordova')) {
+      this.browserTab.isAvailable()
+        .then(isAvailable => {
+          if (isAvailable) {
+            this.browserTab.openUrl(this.beaconData.data.url);
+          }
+        });
+    };
+  }
 }
