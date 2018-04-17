@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Ionic + Beacons</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <div *ngIf="!beaconData; else beaconFound">
+    <ion-card>
+      <ion-card-header>
+        Beacons
+      </ion-card-header>
+      <ion-card-content>
+        <button ion-button (click)="startScanForBeacones()">Start Scan</button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ng-template #beaconFound>
+      <ion-card>
+          <ion-card-header>
+            Beacons Found
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list >
+              <ion-item><a href="{{beaconData.url}}" target="_blank">{{beaconData.url}}</a></ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+  </ng-template>
+</ion-content>
