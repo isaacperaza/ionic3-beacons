@@ -87,7 +87,7 @@ export class HomePage {
       return result ? 1 : 0;
     });
 
-    this.random = Math.random();
+    // this.random = Math.random();
 
 
     // console.log('this.beaconData.id', this.beaconData.id);

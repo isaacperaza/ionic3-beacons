@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Sitios de Interes
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list no-padding>
+    <ion-item *ngFor="let beaconData of beaconDirectory">
+      <ion-thumbnail item-start>
+        <img src="{{beaconData.img}}">
+      </ion-thumbnail>
+      <h2>{{beaconData.title}}</h2>
+      <p>{{beaconData.body}}</p>
+    </ion-item>
+  </ion-list>
+</ion-content>
