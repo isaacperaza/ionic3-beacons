@@ -1,10 +1,10 @@
 <ion-header>
-  <ion-navbar>
+  <!-- <ion-navbar>
     <ion-title>Smarturbem</ion-title>
-  </ion-navbar>
+  </ion-navbar> -->
 </ion-header>
 
-<ion-content padding>
+<ion-content no-padding>
 
   <div *ngIf="beaconData">
     <!-- <ion-card>
@@ -39,7 +39,21 @@
 
   </div>
 
-  <!-- <ng-template #beaconFound>
-    
-  </ng-template> -->
+  <div id='main-content' *ngIf="!beaconData">
+    <div>
+      <ion-grid>
+        <ion-row>
+          <ion-col text-center>
+            <img class="logo" src="assets/imgs/icon.png">
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col text-center>
+            <p>No hay información cercana para mostrar</p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+  </div>
+
 </ion-content>

@@ -15,10 +15,11 @@ declare const evothings: any;
 export class HomePage {
 
   beaconData: any = null;
-  beacons = {};
+  beacons: object = {};
   random: number = 0;
   homeUrl: string = 'https://sites.google.com/view/smart-urbem-v1-0-uid/pagina-principal';
 
+  private validBeconsAdress: Array<string> = ['DB:BB:62:4C:3F:B0', 'C2:89:B8:9E:48:CC'];
   // Añadir una entrada por cada beacon con su url
   // para que funcione sin problema usa HTTPS
   private beaconDirectory: Array<any> = [
@@ -54,13 +55,26 @@ export class HomePage {
   startScanForBeacones() {
     this.platform.ready().then(() => {
       evothings.eddystone.startScan((beacon) => {
-        // console.log(beacon);
-        beacon.timeStamp = Date.now();
-        this.beacons[beacon.address] = beacon;
-        this.nearestBeocon();
+        // Just beacons that are in our directory are included
+        if (this.validBeconsAdress.indexOf(beacon.address) >= 0) {
+          beacon.timeStamp = Date.now();
+          this.beacons[beacon.address] = beacon;
+          this.nearestBeocon();
+        }
+      }, (error) => {
+        console.log(error);
       });
+
+      // setTimeout(this.beaconStillAvailable, 1000);
     }).catch(err => console.log(err));
   }
+
+  // beaconStillAvailable() {
+  //   if (Object.keys(this.beacons).length === 0) {
+  //     this.beaconData = null;
+  //     this.change.detectChanges();
+  //   }
+  // }
 
   nearestBeocon() {
     let beaconList = [];
@@ -74,11 +88,26 @@ export class HomePage {
     });
 
     this.random = Math.random();
-    if (this.beaconData === null || this.beaconData.id != this.beaconData.address) {
-      this.beaconData = beaconList.splice(0, 1)[0];
+
+
+    // console.log('this.beaconData.id', this.beaconData.id);
+    // console.log('this.beaconData.id', this.beaconData.id);
+    let nearestBeacon = beaconList.splice(0, 1)[0];
+
+    if (this.beaconData) {
       console.log(this.beaconData);
-      this.beaconData.data = this.getBeaconUrl(this.beaconData.address);
+      console.log(nearestBeacon);
+    }
+    if (this.beaconData === null || this.beaconData.data.id != nearestBeacon.address) {
+      // console.log(this.beaconData);
+      console.log('Entre a cambiar beacon');
+      this.beaconData = nearestBeacon;
+      this.beaconData.data = this.getBeaconData(this.beaconData.address);
+      this.beacons = {};
       this.change.detectChanges();
+      // console.log(this.beaconData);
+      // console.log(this.beaconData.data.id);
+      // console.log(nearestBeacon.address);
     }
   }
 
@@ -93,7 +122,7 @@ export class HomePage {
 
 
   //Esta función se llama desde app.js
-  getBeaconUrl(beaconId) {
+  getBeaconData(beaconId) {
     let data = '';
     for (let i = 0; i < this.beaconDirectory.length; i++) {
       if (this.beaconDirectory[i].id === beaconId) {
